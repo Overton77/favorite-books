@@ -1,0 +1,79 @@
+// This is your Prisma schema file,
+// learn more about it in the docs: https://pris.ly/d/prisma-schema
+
+// Looking for ways to speed up your queries, or scale easily with your serverless or edge functions?
+// Try Prisma Accelerate: https://pris.ly/cli/accelerate-init
+
+generator client {
+  provider = "prisma-client-js"
+  output   = "../app/generated/prisma"
+}
+
+datasource db {
+  provider = "postgresql"
+  url      = env("DATABASE_URL")
+}
+
+model Author {
+  id        String   @id @default(cuid())
+  name      String   @unique
+  bio       String?
+  createdAt DateTime @default(now())
+  updatedAt DateTime @updatedAt
+
+  books Book[]
+
+  @@map("authors")
+}
+
+model Book {
+  id            String   @id @default(cuid())
+  title         String
+  authorId      String
+  description   String?
+  publishedDate String?
+  pageCount     Int?
+  thumbnail     String?
+  googleBooksId String?  @unique
+  isbn10        String?
+  isbn13        String?
+  categories    String[] // Array of categories
+  createdAt     DateTime @default(now())
+  updatedAt     DateTime @updatedAt
+
+  author  Author    @relation(fields: [authorId], references: [id], onDelete: Cascade)
+  reviews Review[]
+  myNotes MyNote[]
+
+  @@map("books")
+}
+
+model MyNote {
+  id        String   @id @default(cuid())
+  title     String
+  content   String
+  bookId    String
+  createdAt DateTime @default(now())
+  updatedAt DateTime @updatedAt
+
+  book Book @relation(fields: [bookId], references: [id], onDelete: Cascade)
+
+  @@map("my_notes")
+}
+
+model Review {
+  id          String   @id @default(cuid())
+  reviewerName String
+  rating      Int      @db.SmallInt // 1-5 stars
+  comment     String?
+  bookId      String
+  createdAt   DateTime @default(now())
+  updatedAt   DateTime @updatedAt
+
+  book Book @relation(fields: [bookId], references: [id], onDelete: Cascade)
+
+  @@map("reviews")
+}
+
+
+
